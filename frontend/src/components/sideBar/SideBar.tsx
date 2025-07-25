@@ -12,7 +12,7 @@ const SideBar = (): React.ReactElement => {
                 <Link to="/" className="menuIcon">
                     <img src="/general/home.svg" alt="" />
                 </Link>
-                <Link to="/" className="menuIcon">
+                <Link to="/create" className="menuIcon">
                     <img src="/general/create.svg" alt="" />
                 </Link>
                 <Link to="/" className="menuIcon">
