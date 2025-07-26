@@ -8,10 +8,17 @@ export interface GalleryItem {
     link?: string;
     board?: string;
     tags?: string[];
-    user?: string;
+    user?: User;
     createdAt?: string;
     updatedAt?: string;
     __v?: number;
+}
+
+export interface User {
+    _id: string;
+    displayName: string;
+    username: string;
+    img: string;
 }
 
 export type GalleryResponse = GalleryItem[];

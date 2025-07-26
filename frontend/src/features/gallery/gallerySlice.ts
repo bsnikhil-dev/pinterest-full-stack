@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import { fetchGalleryItems } from "../../api/services/galleryService";
 import type { GalleryResponse } from "../../api/services/galleryService/galleryService.types";
+import { AxiosError } from "axios";
 
 
 interface GalleryItemsState {
@@ -15,17 +16,21 @@ const initialState: GalleryItemsState = {
     error: null
 }
 
-export const fetchGallery = createAsyncThunk<GalleryResponse, void, { rejectValue: string }>(
-    'gallery/fetchGalleryItems',
-    async (_, { rejectWithValue }) => {
+export const fetchGallery = createAsyncThunk<GalleryResponse, string | undefined, { rejectValue: { message: string } }>(
+    'data/fetchGallery',
+    async (query, { rejectWithValue }) => {
         try {
-            const response = await fetchGalleryItems();
+            const response = await fetchGalleryItems(query);
             return response;
-        } catch (error: any) {
-            return rejectWithValue(error?.message || "Failed to fetch gallery items");
+        } catch (error) {
+            if (error instanceof AxiosError) {
+                return rejectWithValue(error.response?.data);
+            }
+            return rejectWithValue({ message: "An unknown error occurred" });
         }
     }
 )
+
 
 export const gallerySlice = createSlice({
     name: "gallery",
@@ -37,12 +42,13 @@ export const gallerySlice = createSlice({
                 state.status = "loading";
             })
             .addCase(fetchGallery.fulfilled, (state, action: PayloadAction<GalleryResponse>) => {
+
                 state.status = "succeeded";
                 state.items = action.payload;
             })
             .addCase(fetchGallery.rejected, (state, action) => {
                 state.status = 'failed';
-                state.error = action.payload as string;
+                state.error = action.payload?.message as string;
             })
     }
 });

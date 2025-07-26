@@ -4,20 +4,24 @@ import GalleryItem from "../galleryItem/GalleryItem";
 import { useAppDispatch, useAppSelector } from "../../app/hook";
 import { useEffect } from "react";
 import { fetchGallery } from "../../features/gallery/gallerySlice";
+import Spinner from "../spinner/Spinner";
 
-
-const Gallery = (): React.ReactElement => {
+interface GalleryProps {
+    searchQuery?: string
+}
+const Gallery = ({ searchQuery }: GalleryProps): React.ReactElement => {
 
     const dispatch = useAppDispatch();
-    const { status, items: galleryItems } = useAppSelector((state) => state.gallery);
+    const { items: galleryItems,status } = useAppSelector((state) => state.gallery);
 
     useEffect(() => {
-        if (status === "idle") {
-            dispatch(fetchGallery());
-        }
-    }, [dispatch, status])
+        dispatch(fetchGallery(searchQuery));
+    }, [searchQuery])
 
- 
+     if (status === "loading") {
+        return (<Spinner centered message="Loading All Your Post's... Please wait!"    />)
+    }
+
     return (
         <div className="gallery">
             {galleryItems?.map((item) => {
