@@ -9,21 +9,15 @@ import SearchPage from './pages/searchPage/SearchPage.tsx'
 import ProfilePage from './pages/profilePage/ProfilePage.tsx'
 import CreatePage from './pages/createPage/CreatePage.tsx'
 import MainLayout from './layouts/mainLayout/MainLayout.tsx'
+import { Provider } from 'react-redux'
+import { store } from './app/store.ts'
 
-import {
-  QueryClient,
-  QueryClientProvider,
-} from '@tanstack/react-query'
-
-const baseurl = import.meta.env.BASE_PATH;
-
-// Create a client
-const queryClient = new QueryClient()
+const baseurl = import.meta.env.VITE_BASE_PATH;
 
 createRoot(document.getElementById('root')!).render(
 
   <StrictMode>
-    <QueryClientProvider client={queryClient}>
+    <Provider store={store}>
       <BrowserRouter basename={baseurl}>
         <Routes>
           <Route element={<MainLayout />}>
@@ -37,6 +31,6 @@ createRoot(document.getElementById('root')!).render(
           <Route path='*' element={<h1>Not found</h1>} />
         </Routes>
       </BrowserRouter>
-    </QueryClientProvider>
+    </Provider>
   </StrictMode>,
 )

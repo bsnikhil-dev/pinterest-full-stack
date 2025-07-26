@@ -1,5 +1,5 @@
 export interface GalleryItemProps {
-    id: number,
+    id: string | number,
     media: string,
     width: number,
     height: number,
