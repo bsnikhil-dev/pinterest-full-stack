@@ -1,10 +1,45 @@
 import type React from "react";
 import "./postPage.css";
 import PostInteractions from "../../components/postInteractions/PostInteractions";
-import { Link } from "react-router";
+import { Link, useParams } from "react-router";
 import Comments from "../../components/comments/Comments";
+import { useAppDispatch, useAppSelector } from "../../app/hook";
+import { useEffect } from "react";
+import { fetchPostData } from "../../features/post/postSlice";
+import Spinner from "../../components/spinner/Spinner";
 
 const PostPage = (): React.ReactElement => {
+
+    const dispatch = useAppDispatch();
+    const { id } = useParams();
+    const { items: postData, status } = useAppSelector((state) => state.post);
+
+    let postImage: string | null = null;
+    let userName: string | null = null;
+    let userImage: string | null = null;
+    let displayName: string | null = null;
+
+    if (postData[0]) {
+        const { media, user } = postData[0];
+
+        postImage = media as string;
+
+        if (user) {
+            userName = user.username as string;
+            userImage = user.img as string;
+            displayName = user.displayName as string;
+        }
+    }
+   
+    useEffect(() => {
+        if (id) {
+            dispatch(fetchPostData(id));
+        }
+    }, [id]);
+
+    if (status === "loading") {
+        return (<Spinner centered message="Fetching Your Post... Please wait!"    />)
+    }
     return (
         <div className="postpage">
             <svg
@@ -17,13 +52,13 @@ const PostPage = (): React.ReactElement => {
             </svg>
             <div className="postContainer">
                 <div className="postImage">
-                    <img src="/pins/pin1.jpeg" width={736} />
+                    <img src={postImage ? postImage : `/general/noAvatar.png`} width={736} />
                 </div>
                 <div className="postDetails">
                     <PostInteractions />
-                    <Link to="/user/john" className="postUser">
-                        <img src="/general/noAvatar.png" />
-                        <span>John Doe</span>
+                    <Link to={`/user/${userName}`} className="postUser">
+                        <img src={userImage ? userImage : `/general/noAvatar.png`} />
+                        <span>{displayName}</span>
                     </Link>
                     <Comments />
                 </div>
