@@ -42,6 +42,7 @@ const PostPage = (): React.ReactElement => {
     }
     return (
         <div className="postpage">
+            <Link to={`/`}>
             <svg
                 height="20"
                 viewBox="0 0 24 24"
@@ -50,6 +51,7 @@ const PostPage = (): React.ReactElement => {
             >
                 <path d="M8.41 4.59a2 2 0 1 1 2.83 2.82L8.66 10H21a2 2 0 0 1 0 4H8.66l2.58 2.59a2 2 0 1 1-2.82 2.82L1 12z"></path>
             </svg>
+            </Link>
             <div className="postContainer">
                 <div className="postImage">
                     <img src={postImage ? postImage : `/general/noAvatar.png`} width={736} />

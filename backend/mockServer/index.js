@@ -3,6 +3,7 @@ import cors from "cors";
 
 import pinRouter from "./routes/pin.route.js";
 import usersRouter from "./routes/users.route.js";
+import collectionsRouter from "./routes/collections.route.js";
 
 import connectDB from "./utils/databaseConnection.js";
 
@@ -13,7 +14,7 @@ app.use(cors({ origin: "*", credentials: true }));
 
 app.use("/pins", pinRouter);
 app.use("/users", usersRouter);
-
+app.use("/collections", collectionsRouter);
 
 app.listen(3000, () => {
   connectDB();
