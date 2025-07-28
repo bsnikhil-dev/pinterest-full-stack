@@ -5,13 +5,19 @@ export const getPins = async (req, res) => {
     try {
 
         const search = req.query.query;
-
+        const userId = req.query.userId;
+        const collectionId = req.query.collectionId;
+        console.log(collectionId);
         const pins = await Pin.find(search ? {
             $or: [
                 { title: { $regex: search, $options: "i" } },
                 { tags: { $in: [search] } },
             ],
-        } : {}).limit(5);
+        } : userId
+            ? { user: userId }
+            : collectionId
+                ? { board: collectionId }
+                : {});
 
         // await new Promise((resolve) => setTimeout(resolve, 5000));
         res.status(200).json(pins);

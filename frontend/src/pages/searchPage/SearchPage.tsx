@@ -6,9 +6,10 @@ const SearchPage = (): React.ReactElement => {
 
     const [searchParams] = useSearchParams();
     const query = searchParams.get("query");
+    const collectionId = searchParams.get("collectionId");
 
     return (
-        <Gallery searchQuery={query as string} />
+        <Gallery searchQuery={query as string} collectionId={collectionId as string} />
     )
 }
 

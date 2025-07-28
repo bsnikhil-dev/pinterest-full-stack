@@ -16,11 +16,17 @@ const initialState: GalleryItemsState = {
     error: null
 }
 
-export const fetchGallery = createAsyncThunk<GalleryResponse, string | undefined, { rejectValue: { message: string } }>(
+export interface FetchGalleryPayload {
+    searchQuery?: string;
+    userId?: string;
+    collectionId?: string;
+}
+
+export const fetchGallery = createAsyncThunk<GalleryResponse, FetchGalleryPayload, { rejectValue: { message: string } }>(
     'data/fetchGallery',
-    async (query, { rejectWithValue }) => {
+    async (payload, { rejectWithValue }) => {
         try {
-            const response = await fetchGalleryItems(query);
+            const response = await fetchGalleryItems(payload);
             return response;
         } catch (error) {
             if (error instanceof AxiosError) {

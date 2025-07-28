@@ -7,19 +7,21 @@ import { fetchGallery } from "../../features/gallery/gallerySlice";
 import Spinner from "../spinner/Spinner";
 
 interface GalleryProps {
-    searchQuery?: string
+    searchQuery?: string;
+    userId?: string;
+    collectionId?: string
 }
-const Gallery = ({ searchQuery }: GalleryProps): React.ReactElement => {
+const Gallery = (payload: GalleryProps): React.ReactElement => {
 
     const dispatch = useAppDispatch();
-    const { items: galleryItems,status } = useAppSelector((state) => state.gallery);
+    const { items: galleryItems, status } = useAppSelector((state) => state.gallery);
 
     useEffect(() => {
-        dispatch(fetchGallery(searchQuery));
-    }, [searchQuery])
+        dispatch(fetchGallery(payload));
+    }, [payload])
 
-     if (status === "loading") {
-        return (<Spinner centered message="Loading All Your Post's... Please wait!"    />)
+    if (status === "loading") {
+        return (<Spinner centered message="Loading All Your Post's... Please wait!" />)
     }
 
     return (
