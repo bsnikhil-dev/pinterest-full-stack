@@ -1,6 +1,5 @@
 import { type GalleryResponse } from "./galleryService.types";
 import apiClient from "../../axios";
-import type { UserData } from "../../../features/user/useSlice";
 import type { FetchGalleryPayload } from "../../../features/gallery/gallerySlice";
 
 export const fetchGalleryItems = async (payload: FetchGalleryPayload | undefined): Promise<GalleryResponse> => {
@@ -43,11 +42,3 @@ export const fetchPost = async (params: string): Promise<GalleryResponse> => {
     }
 }
 
-export const fetchUser = async (username: string): Promise<UserData> => {
-    try {
-        const response = await apiClient.get<UserData>(`/users/${username}`);
-        return response.data;
-    } catch (error) {
-        throw error;
-    }
-}
