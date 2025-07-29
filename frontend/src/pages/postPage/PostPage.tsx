@@ -30,7 +30,7 @@ const PostPage = (): React.ReactElement => {
             displayName = user.displayName as string;
         }
     }
-   
+
     useEffect(() => {
         if (id) {
             dispatch(fetchPostData(id));
@@ -38,19 +38,19 @@ const PostPage = (): React.ReactElement => {
     }, [id]);
 
     if (status === "loading") {
-        return (<Spinner centered message="Fetching Your Post... Please wait!"    />)
+        return (<Spinner centered message="Fetching Your Post... Please wait!" />)
     }
     return (
         <div className="postpage">
             <Link to={`/`}>
-            <svg
-                height="20"
-                viewBox="0 0 24 24"
-                width="20"
-                style={{ cursor: "pointer" }}
-            >
-                <path d="M8.41 4.59a2 2 0 1 1 2.83 2.82L8.66 10H21a2 2 0 0 1 0 4H8.66l2.58 2.59a2 2 0 1 1-2.82 2.82L1 12z"></path>
-            </svg>
+                <svg
+                    height="20"
+                    viewBox="0 0 24 24"
+                    width="20"
+                    style={{ cursor: "pointer" }}
+                >
+                    <path d="M8.41 4.59a2 2 0 1 1 2.83 2.82L8.66 10H21a2 2 0 0 1 0 4H8.66l2.58 2.59a2 2 0 1 1-2.82 2.82L1 12z"></path>
+                </svg>
             </Link>
             <div className="postContainer">
                 <div className="postImage">
@@ -62,7 +62,7 @@ const PostPage = (): React.ReactElement => {
                         <img src={userImage ? userImage : `/general/noAvatar.png`} />
                         <span>{displayName}</span>
                     </Link>
-                    <Comments />
+                    <Comments userId={id} />
                 </div>
             </div>
         </div>
