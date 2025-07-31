@@ -14,3 +14,11 @@ export interface UserComment {
     updatedAt: string;
     __v: number;
 };
+
+export interface userDetails {
+    userId: string;
+    displayName: string;
+    username: string;
+    email: string;
+}
+
