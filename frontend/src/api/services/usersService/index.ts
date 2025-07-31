@@ -40,6 +40,7 @@ export const loginUser = async (userData: { email: string; password: string; }):
         const response = await apiClient.post<userDetails>(`/users/auth/login`, userData);
         return response.data;
     } catch (error) {
+        console.log("Axios")
         throw error;
     }
 }
