@@ -11,7 +11,7 @@ interface LoadingSpinnerProps {
 const Spinner: React.FC<LoadingSpinnerProps> = ({
   size = 48,
   color = "#555",
-  centered = false,
+  centered = true,
   message = "Loading, please wait...",
 }) => {
   const style: React.CSSProperties = {

@@ -6,13 +6,13 @@ import { AxiosError } from "axios";
 
 interface GalleryItemsState {
     items: GalleryResponse,
-    status: 'idle' | 'loading' | 'succeeded' | 'failed';
+    status: boolean | null;
     error: string | null;
 }
 
 const initialState: GalleryItemsState = {
     items: [],
-    status: 'idle',
+    status: null,
     error: null
 }
 
@@ -45,16 +45,16 @@ export const gallerySlice = createSlice({
     extraReducers: (builder) => {
         builder
             .addCase(fetchGallery.pending, (state) => {
-                state.status = "loading";
+                state.status = true;
             })
             .addCase(fetchGallery.fulfilled, (state, action: PayloadAction<GalleryResponse>) => {
 
-                state.status = "succeeded";
+                state.status = false;
                 state.items = action.payload;
             })
             .addCase(fetchGallery.rejected, (state, action) => {
-                
-                state.status = 'failed';
+
+                state.status = null;
                 state.error = action.payload?.message as string;
 
             })

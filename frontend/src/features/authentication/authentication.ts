@@ -5,8 +5,9 @@ import { AxiosError } from "axios";
 
 interface userAuthenticationState {
     user: userDetails;
-    status: 'idle' | 'loading' | 'succeeded' | 'failed';
+    status: boolean | null;
     error: string | null;
+    isAuthenticated: boolean | null;
 }
 
 const initialAuthState: userAuthenticationState = {
@@ -16,8 +17,9 @@ const initialAuthState: userAuthenticationState = {
         username: "",
         email: ""
     },
-    status: 'idle',
-    error: null
+    status: null,
+    error: null,
+    isAuthenticated: null,
 }
 
 export const registerUserThunk = createAsyncThunk<userDetails,
@@ -26,32 +28,34 @@ export const registerUserThunk = createAsyncThunk<userDetails,
         displayName: string;
         email: string;
         password: string;
-    }, { rejectValue: string }>(
+    }, { rejectValue: { message: string } }>(
         "post/registerUser",
         async (userData, { rejectWithValue }) => {
             try {
                 const response = await registerUser(userData);
                 return response;
-            } catch (error) {
+            } catch (error: any) {
                 if (error instanceof AxiosError) {
                     return rejectWithValue(error.response?.data);
                 }
-                return rejectWithValue("An unknown error occurred")
+                return rejectWithValue(error.response?.data)
             }
         }
     )
 
-export const loginUserThunk = createAsyncThunk<userDetails, { email: string; password: string; }, { rejectValue: string; }>(
+export const loginUserThunk = createAsyncThunk<userDetails, { email: string; password: string; }, { rejectValue: { message: string; } }>(
     "post/loginUser",
     async (userData, { rejectWithValue }) => {
         try {
             const response = await loginUser(userData);
             return response
-        } catch (error) {
+        } catch (error: any) {
             if (error instanceof AxiosError) {
+
                 return rejectWithValue(error.response?.data)
             }
-            return rejectWithValue("An unknown error occurred")
+
+            return rejectWithValue(error.response?.data)
         }
     }
 )
@@ -63,28 +67,28 @@ const AuthSlice = createSlice({
     extraReducers: (builder) => {
         builder
             .addCase(registerUserThunk.pending, (state) => {
-                state.status = "loading";
+                state.status = true;
             })
             .addCase(registerUserThunk.fulfilled, (state, action: PayloadAction<userDetails>) => {
-                state.status = "succeeded";
+                state.status = false;
                 state.user = action.payload;
-
+                state.isAuthenticated = true;
             })
             .addCase(registerUserThunk.rejected, (state, action) => {
-                state.status = "failed";
-                state.error = action.payload as string;
+                state.status = false;
+                state.error = action.payload?.message as string;
             })
             .addCase(loginUserThunk.pending, (state) => {
-                state.status = "loading";
+                state.status = true;
             })
             .addCase(loginUserThunk.fulfilled, (state, action: PayloadAction<userDetails>) => {
-                state.status = "succeeded";
+                state.status = false;
                 state.user = action.payload;
-
+                state.isAuthenticated = true;
             })
             .addCase(loginUserThunk.rejected, (state, action) => {
-                state.status = "failed";
-                state.error = action.payload as string;
+                state.status = false;
+                state.error = action.payload?.message as string;
             })
     }
 })
