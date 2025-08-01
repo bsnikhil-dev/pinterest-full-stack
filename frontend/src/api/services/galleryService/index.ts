@@ -3,34 +3,27 @@ import apiClient from "../../axios";
 import type { FetchGalleryPayload } from "../../../features/gallery/gallerySlice";
 
 export const fetchGalleryItems = async (payload: FetchGalleryPayload | undefined): Promise<GalleryResponse> => {
-    try {
+    let queryString: string = "";
 
-
-        let queryString: string = "";
-
-        if (payload?.searchQuery) {
-            queryString = `query=${payload.searchQuery}`
-        }
-
-        if (payload?.userId) {
-            queryString = `userId=${payload.userId}`
-        }
-
-        if (payload?.collectionId) {
-            queryString = `collectionId=${payload.collectionId}`
-        }
-
-        let url: string;
-
-        payload ? url = `/pins?${queryString}` : url = "/pins";
-
-        // const url = payload ? `/pins?query=${payload.searchQuery}&userId=${payload.userId}` : `/pins`;
-
-        const response = await apiClient.get<GalleryResponse>(url);
-        return response.data;
-    } catch (error) {
-        throw error;
+    if (payload?.searchQuery) {
+        queryString = `query=${payload.searchQuery}`
     }
+
+    if (payload?.userId) {
+        queryString = `userId=${payload.userId}`
+    }
+
+    if (payload?.collectionId) {
+        queryString = `collectionId=${payload.collectionId}`
+    }
+
+    let url: string;
+
+    payload ? url = `/pins?${queryString}` : url = "/pins";
+
+    const response = await apiClient.get<GalleryResponse>(url);
+    return response.data;
+
 }
 
 export const fetchPost = async (params: string): Promise<GalleryResponse> => {
