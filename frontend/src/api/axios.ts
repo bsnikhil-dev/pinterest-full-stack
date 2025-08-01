@@ -38,6 +38,33 @@ const generateHeaders = (config: InternalAxiosRequestConfig): InternalAxiosReque
     };
 }
 
+const noErrorResponseHandler = async (err: AxiosError) => {
+    const customError = {
+        ...err,
+        response: {
+            status: 500,
+            statusText: "Network Error",
+            data: {
+                message: "An Unexpected Error Occured!",
+            }
+
+        },
+    };
+    return Promise.reject(customError);
+};
+
+const errorFunction = (error: AxiosError) => {
+    if (!error.response) {
+        return noErrorResponseHandler(error);
+    }
+    const { status } = error.response;
+
+    if (status !== 401) {
+        return Promise.reject(error); // Re-throw error if it has a response
+    }
+
+}
+
 apiClient.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
         return generateHeaders(config);
@@ -45,4 +72,5 @@ apiClient.interceptors.request.use(
     (error) => Promise.reject(error)
 );
 
+apiClient.interceptors.response.use(undefined, errorFunction)
 export default apiClient;

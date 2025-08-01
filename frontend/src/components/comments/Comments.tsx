@@ -21,7 +21,7 @@ const Comments = ({ userId }: { userId?: string }): React.ReactElement => {
         dispatch(fetchUserCommentsData(userId as string));
     }, [userId])
 
-    console.log(comments);
+    // console.log(comments);
     return (
         <div className="comments">
             <div className="commentList">

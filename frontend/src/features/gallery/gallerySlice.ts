@@ -28,11 +28,11 @@ export const fetchGallery = createAsyncThunk<GalleryResponse, FetchGalleryPayloa
         try {
             const response = await fetchGalleryItems(payload);
             return response;
-        } catch (error) {
+        } catch (error: any) {
             if (error instanceof AxiosError) {
                 return rejectWithValue(error.response?.data);
             }
-            return rejectWithValue({ message: "An unknown error occurred" });
+            return rejectWithValue(error.response?.data);
         }
     }
 )
@@ -53,8 +53,10 @@ export const gallerySlice = createSlice({
                 state.items = action.payload;
             })
             .addCase(fetchGallery.rejected, (state, action) => {
+                
                 state.status = 'failed';
                 state.error = action.payload?.message as string;
+
             })
     }
 });
