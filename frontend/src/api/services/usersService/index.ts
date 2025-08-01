@@ -28,7 +28,8 @@ export const registerUser = async (userData: {
     password: string;
 }): Promise<userDetails> => {
     try {
-        const response = await apiClient.post<userDetails>(`/users/auth/register`, userData);
+        const response = await apiClient.post<userDetails>(`/users/auth/register`, userData,
+            { headers: { 'request-id': "REGISTER_REQUEST_ID" } });
         return response.data;
     } catch (error) {
         throw error;
@@ -37,9 +38,10 @@ export const registerUser = async (userData: {
 
 export const loginUser = async (userData: { email: string; password: string; }): Promise<userDetails> => {
     try {
-        const response = await apiClient.post<userDetails>(`/users/auth/login`, userData);
-        return response.data;
+        const response = await apiClient.post<userDetails>(`/users/auth/login`, userData,
+            { headers: { 'request-id': "LOGIN_REQUEST_ID" } });
+        return response?.data;
     } catch (error) {
-        throw error;
+        return Promise.reject(error);
     }
 }

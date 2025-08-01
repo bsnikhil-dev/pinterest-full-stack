@@ -5,6 +5,8 @@ import { useAppDispatch, useAppSelector } from "../../app/hook";
 import { useEffect } from "react";
 import { fetchGallery } from "../../features/gallery/gallerySlice";
 import Spinner from "../spinner/Spinner";
+import AsyncLoaderComponent from "../customAsyncComponent/AsyncLoader";
+import ErrorComponent from "../error/Error";
 
 interface GalleryProps {
     searchQuery?: string;
@@ -14,24 +16,28 @@ interface GalleryProps {
 const Gallery = (payload: GalleryProps): React.ReactElement => {
 
     const dispatch = useAppDispatch();
-    const { items: galleryItems, status } = useAppSelector((state) => state.gallery);
+    const { items: galleryItems, status: loadingStatus, error } = useAppSelector((state) => state.gallery);
 
     useEffect(() => {
         dispatch(fetchGallery(payload));
     }, [payload])
 
-    if (status === "loading") {
-        return (<Spinner centered message="Loading All Your Post's... Please wait!" />)
-    }
-
     return (
-        <div className="gallery">
-            {galleryItems?.map((item) => {
-                const galleryItem = { id: item._id, media: item.media || '', width: item.width || 0, height: item.height || 0 };
-                return <GalleryItem item={galleryItem} key={item._id} />
-            })
-            }
-        </div>
+
+        <AsyncLoaderComponent
+            isLoading={loadingStatus}
+            loaderComponent={<Spinner centered message="Loading All Your Post's... Please wait!" />}
+            isError={error ? true : false}
+            errorComponent={<ErrorComponent errorMessage={error as string} />}
+            contentComponent={<div className="gallery">
+                {galleryItems?.map((item) => {
+                    const galleryItem = { id: item._id, media: item.media || '', width: item.width || 0, height: item.height || 0 };
+                    return <GalleryItem item={galleryItem} key={item._id} />
+                })
+                }
+            </div>}
+        />
+
     )
 }
 

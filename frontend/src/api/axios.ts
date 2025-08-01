@@ -21,7 +21,6 @@ const getHeaders = (subKey: string) => {
         'Ocp-Apim-Subscription-Key': subKey,
         'Correlationid': '9f5bcfab-ecea-4ae3-a24e-4a4b9745f513',
         'token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9',
-        'request-id': 'LOGIN_REQUEST_ID',
     }
 }
 
@@ -59,9 +58,9 @@ const errorFunction = (error: AxiosError) => {
     }
     const { status } = error.response;
 
-    if (status !== 401) {
+    // if (status !== 401) {
         return Promise.reject(error); // Re-throw error if it has a response
-    }
+    // }
 
 }
 
