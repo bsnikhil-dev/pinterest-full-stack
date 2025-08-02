@@ -20,5 +20,6 @@ export interface userDetails {
     displayName: string;
     username: string;
     email: string;
+    token:string;
 }
 

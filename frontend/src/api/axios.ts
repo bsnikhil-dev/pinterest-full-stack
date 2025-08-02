@@ -10,25 +10,24 @@ import axios,
 const apiClient: AxiosInstance = axios.create({
     baseURL: import.meta.env.VITE_API_BASE_URL,
     withCredentials: true,
-    timeout: 5000,
+    timeout: 10000,
 });
 
 
 const getHeaders = (subKey: string) => {
     return {
-        'Content-type': 'application/json',
-        'Accept': 'application/json',
-        'Ocp-Apim-Subscription-Key': subKey,
-        'Correlationid': '9f5bcfab-ecea-4ae3-a24e-4a4b9745f513',
-        'token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9',
+        'ocp-apim-subscription-key': subKey,
+        'correlationid': '9f5bcfab-ecea-4ae3-a24e-4a4b9745f513',
+        'content-type': 'application/json',
+        'accept': 'application/json',
     }
 }
 
 const generateHeaders = (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
 
     const newHeaders = AxiosHeaders.from({
-        ...config.headers,
         ...getHeaders("1234567890abcdef1234567890abcdef"),
+        ...config.headers,
     });
 
     return {
@@ -59,7 +58,7 @@ const errorFunction = (error: AxiosError) => {
     const { status } = error.response;
 
     // if (status !== 401) {
-        return Promise.reject(error); // Re-throw error if it has a response
+    return Promise.reject(error); // Re-throw error if it has a response
     // }
 
 }

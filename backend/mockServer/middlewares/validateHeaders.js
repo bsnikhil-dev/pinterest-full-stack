@@ -2,18 +2,15 @@ const SUBSCRIPTION_KEY = "1234567890abcdef1234567890abcdef";
 const REGISTER_REQUEST_ID = "REGISTER_REQUEST_ID";
 const LOGIN_REQUEST_ID = "LOGIN_REQUEST_ID";
 
-export const validateHeaders = (endpointType) => (req, res, next) => {
+export const validateHeaders = (endpointType = null) => (req, res, next) => {
     const requiredHeaders = [
         'ocp-apim-subscription-key',
         'correlationid',
         'accept',
-        'token',
-        'content-type',
-        'request-id',
     ];
 
     const missingHeaders = requiredHeaders.filter((header) => !req.headers[header]);
-    const requestId = req.headers['request-id']; // get it from headers
+    const requestId = req.headers['request-id'];
 
     if (missingHeaders.length > 0) {
         return res.status(400).json({
@@ -22,11 +19,9 @@ export const validateHeaders = (endpointType) => (req, res, next) => {
         });
     }
 
-    // Validate subscription key
     const receivedKey = req.headers['ocp-apim-subscription-key'];
-    
+
     if (receivedKey !== SUBSCRIPTION_KEY) {
-         console.log(receivedKey)
         return res.status(403).json({
             message: 'Invalid subscription key',
             code: 'INVALID_SUBSCRIPTION_KEY',

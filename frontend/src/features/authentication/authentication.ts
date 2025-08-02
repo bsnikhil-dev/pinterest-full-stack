@@ -15,7 +15,8 @@ const initialAuthState: userAuthenticationState = {
         userId: "",
         displayName: "",
         username: "",
-        email: ""
+        email: "",
+        token: "",
     },
     status: null,
     error: null,
@@ -82,9 +83,11 @@ const AuthSlice = createSlice({
                 state.status = true;
             })
             .addCase(loginUserThunk.fulfilled, (state, action: PayloadAction<userDetails>) => {
+               
                 state.status = false;
                 state.user = action.payload;
                 state.isAuthenticated = true;
+                
             })
             .addCase(loginUserThunk.rejected, (state, action) => {
                 state.status = false;

@@ -56,10 +56,10 @@ const AuthPage = (): React.ReactElement => {
         setErrorMessage("");
     }, [isRegistered]);
 
-    console.log(isAuthenticated);
-
     useEffect(() => {
         if (isAuthenticated) {
+            const token = userDetails.token.split(' ')[1];
+            sessionStorage.setItem("token", token);
             navigate("/", { replace: true });
         }
     }, [isAuthenticated, navigate]);
