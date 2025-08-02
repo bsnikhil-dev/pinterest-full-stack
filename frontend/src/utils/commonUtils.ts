@@ -1,3 +1,5 @@
+import type { Draft } from "@reduxjs/toolkit";
+
 export const timeAgo = (dateString: string): string => {
 
     const now = new Date();
@@ -16,5 +18,28 @@ export const timeAgo = (dateString: string): string => {
     if (hours < 24) return rtf.format(-hours, 'hour');
     return rtf.format(-days, 'day');
 }
+
+interface ErrorState {
+    code: number | null;
+    message: string | null;
+}
+
+export const resetError = (state: Draft<{ error: ErrorState }>) => {
+    state.error.code = null;
+    state.error.message = null;
+}
+
+interface ErrorPayload {
+    code?: number;
+    message?: string;
+}
+
+export const setErrorFromPayload = (
+    state: Draft<{ error: ErrorState }>,
+    payload?: ErrorPayload
+) => {
+    state.error.code = payload?.code ?? null;
+    state.error.message = payload?.message ?? null;
+};
 
 

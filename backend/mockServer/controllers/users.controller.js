@@ -1,7 +1,15 @@
 import User from "../models/user.model.js";
 import Follow from "../models/follow.model.js";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
+export const generateToken = (userId) => {
+    return jwt.sign(
+        { userId },
+        process.env.JWT_SECRET,
+        { expiresIn: "10m" }
+    );
+};
 
 export const registerUser = async (req, res) => {
     try {
@@ -9,7 +17,6 @@ export const registerUser = async (req, res) => {
 
         const newHashedPassword = await bcrypt.hash(password, 10);
 
-        // Check for existing user with same email or username
         const existingUser = await User.findOne({
             $or: [
                 { email: email.toLowerCase() },
@@ -32,17 +39,19 @@ export const registerUser = async (req, res) => {
             hashedPassword: newHashedPassword,
         });
 
+        const token = generateToken(user._id);
+
         const { _id, hashedPassword, createdAt, updatedAt, __v, ...rest } = user.toObject();
 
         const userDetails = {
+            token: `Bearer ${token}`,
             userId: _id.toString(),
             ...rest,
         };
-        res.status(201).json(userDetails);
+        return res.status(201).json(userDetails);
     } catch (err) {
-        res.status(500).json({ message: "Internal Server Error", code: "INTERNAL_ERROR" });
+        return res.status(500).json({ message: "Internal Server Error", code: "INTERNAL_ERROR" });
     }
-
 };
 
 export const loginUser = async (req, res) => {
@@ -61,18 +70,19 @@ export const loginUser = async (req, res) => {
             return res.status(401).json({ message: "Invalid email or password", code: "INVALID_CREDENTIALS" });
         }
 
+        const token = generateToken(user._id);
+
         const { _id, hashedPassword, createdAt, updatedAt, __v, ...rest } = user.toObject();
 
         const userDetails = {
+            token: `Bearer ${token}`,
             userId: _id.toString(),
             ...rest,
         };
-        res.status(200).json(userDetails);
+        return res.status(200).json(userDetails);
     } catch (err) {
-        res.status(500).json({ message: "Internal Server Error", code: "INTERNAL_ERROR" });
+        return res.status(500).json({ message: "Internal Server Error", code: "INTERNAL_ERROR" });
     }
-
-
 };
 
 export const logoutUser = async (req, res) => {

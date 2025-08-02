@@ -18,6 +18,8 @@ const Gallery = (payload: GalleryProps): React.ReactElement => {
     const dispatch = useAppDispatch();
     const { items: galleryItems, status: loadingStatus, error } = useAppSelector((state) => state.gallery);
 
+    const isError = !Object.values(error).every(value => !value);
+    
     useEffect(() => {
         dispatch(fetchGallery(payload));
     }, [payload])
@@ -27,8 +29,8 @@ const Gallery = (payload: GalleryProps): React.ReactElement => {
         <AsyncLoaderComponent
             isLoading={loadingStatus}
             loaderComponent={<Spinner centered message="Loading All Your Post's... Please wait!" />}
-            isError={error ? true : false}
-            errorComponent={<ErrorComponent errorMessage={error as string} />}
+            isError={isError ? true : false}
+            errorComponent={<ErrorComponent errorMessage={error.message as string} errorCode={error.code as number} />}
             contentComponent={<div className="gallery">
                 {galleryItems?.map((item) => {
                     const galleryItem = { id: item._id, media: item.media || '', width: item.width || 0, height: item.height || 0 };
