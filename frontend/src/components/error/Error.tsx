@@ -1,25 +1,27 @@
 import React from 'react';
 import './error.css';
-import { useMatch } from 'react-router';
+import { useMatch, useNavigate } from 'react-router';
 
 interface ErrorComponentProps {
     errorMessage?: string;
     errorCode?: number;
+    onRetry?: () => void;
 }
 
-const ErrorComponent: React.FC<ErrorComponentProps> = ({ errorMessage = "", errorCode = null }) => {
+const ErrorComponent: React.FC<ErrorComponentProps> = ({ errorMessage = "", errorCode = null, onRetry }) => {
 
     const match = useMatch("/");
-    
+    const navigate = useNavigate();
+
     return (
         <div className="error-container">
             <div className="error-card">
                 <h1>{`${errorCode} : ${errorMessage}`}</h1>
                 <p>Oops! Something went wrong. <br />
-                    We’re already working on it. Please try again in a moment.</p>
+                    We apologize for the inconvenience. Kindly try again in a few moments.</p>
                 <div className="error-buttons">
-                    <button >Retry</button>
-                    {match ? null : <button >Go Home</button>}
+                    <button onClick={onRetry}>Retry</button>
+                    {!match && <button onClick={() => navigate("/")}>Return to Homepage</button>}
                 </div>
             </div>
         </div>

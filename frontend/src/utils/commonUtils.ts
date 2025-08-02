@@ -42,4 +42,8 @@ export const setErrorFromPayload = (
     state.error.message = payload?.message ?? null;
 };
 
+export const checkErrorStatus = (error: { code: number | null; message: string | null }): boolean => {
+    return !Object.values(error).every(value => !value);
+}
+
 

@@ -1,17 +1,28 @@
 import type React from "react";
 import "./UserButton.css";
 import { useState } from "react";
+import { useNavigate } from "react-router";
+import { useAppDispatch } from "../../app/hook";
+import { logout } from "../../features/authentication/authentication";
 
 const UserButton = (): React.ReactElement => {
 
     const [showOptions, setShowOptions] = useState<boolean>(false);
-    const flag = true;
+    const navigate = useNavigate();
+    const dispatch = useAppDispatch();
 
     const handleOptionsClick = (): void => {
         setShowOptions((prev) => !prev);
     }
 
-    return flag ? (
+    const handleLogout = (): void => {
+        dispatch(logout());
+        sessionStorage.removeItem("token");
+        navigate("/auth", { replace: true });
+    }
+
+
+    return (
         <div className="userbutton">
             <img src="/general/noAvatar.png" alt="" />
             <img src="/general/arrow.svg" alt="" className="arrow" onClick={handleOptionsClick} />
@@ -20,12 +31,12 @@ const UserButton = (): React.ReactElement => {
                 <div className="useroptions">
                     <div className="useroption">Profile</div>
                     <div className="useroption">Settings</div>
-                    <div className="useroption">Logout</div>
+                    <div className="useroption" onClick={handleLogout}>Logout</div>
                 </div>
             }
 
         </div>
-    ) : (<a href="/" className="loginlink">Login / Sign Up</a>)
+    )
 }
 
 export default UserButton;

@@ -64,7 +64,6 @@ const AuthPage = (): React.ReactElement => {
         }
     }, [isAuthenticated, navigate]);
 
-
     return (
         <AsyncLoaderComponent
             isLoading={loadingStatus ? true : false}
