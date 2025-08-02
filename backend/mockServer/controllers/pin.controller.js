@@ -32,12 +32,25 @@ export const getPins = async (req, res) => {
 };
 
 export const getPin = async (req, res) => {
-    const { id } = req.params;
-    const pin = await Pin.findById(id).populate(
-        "user",
-        "username img displayName"
-    );
-    await new Promise((resolve) => setTimeout(resolve, 3000));
-    res.status(200).json([pin]);
+    try {
+        const { id } = req.params;
+
+        const pin = await Pin.findById(id).populate(
+            "user",
+            "username img displayName"
+        );
+
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+        const { user, media } = pin;
+        const reponseData = {
+            media,
+            user
+        }
+        return res.status(200).json([reponseData]);
+
+    } catch (error) {
+        return res.status(500).json({ message: "Internal Server error" });
+    }
+
 };
 

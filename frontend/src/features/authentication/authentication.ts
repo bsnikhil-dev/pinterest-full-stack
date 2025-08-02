@@ -64,7 +64,11 @@ export const loginUserThunk = createAsyncThunk<userDetails, { email: string; pas
 const AuthSlice = createSlice({
     name: "auth",
     initialState: initialAuthState,
-    reducers: {},
+    reducers: {
+        logout: (state) => {
+            state.isAuthenticated = false;
+        }
+    },
     extraReducers: (builder) => {
         builder
             .addCase(registerUserThunk.pending, (state) => {
@@ -83,11 +87,11 @@ const AuthSlice = createSlice({
                 state.status = true;
             })
             .addCase(loginUserThunk.fulfilled, (state, action: PayloadAction<userDetails>) => {
-               
+
                 state.status = false;
                 state.user = action.payload;
                 state.isAuthenticated = true;
-                
+
             })
             .addCase(loginUserThunk.rejected, (state, action) => {
                 state.status = false;
@@ -96,4 +100,5 @@ const AuthSlice = createSlice({
     }
 })
 
+export const { logout } = AuthSlice.actions;
 export default AuthSlice.reducer;

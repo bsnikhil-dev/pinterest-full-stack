@@ -2,30 +2,31 @@ import { createAsyncThunk, createSlice, type PayloadAction } from "@reduxjs/tool
 import type { GalleryResponse } from "../../api/services/galleryService/galleryService.types";
 import { AxiosError } from "axios";
 import { fetchPost } from "../../api/services/galleryService";
+import { resetError, setErrorFromPayload } from "../../utils/commonUtils";
 
 interface PostItem {
     items: GalleryResponse,
-    status: 'idle' | 'loading' | 'succeeded' | 'failed';
-    error: string | null;
+    status: boolean;
+    error: { code: number | null; message: string | null };
 }
 
 const initialPost: PostItem = {
     items: [],
-    status: "idle",
-    error: null
+    status: false,
+    error: { code: null, message: null }
 }
 
-export const fetchPostData = createAsyncThunk<GalleryResponse, string, { rejectValue: string }>(
+export const fetchPostData = createAsyncThunk<GalleryResponse, string, { rejectValue: { code: number; message: string } }>(
     "fetch/post",
     async (params, { rejectWithValue }) => {
         try {
             const response = await fetchPost(params);
             return response;
-        } catch (error) {
+        } catch (error: any) {
             if (error instanceof AxiosError) {
-                return rejectWithValue(error.response?.data);
+                return rejectWithValue({ code: error?.status as number, message: error?.response?.data.message });
             }
-            return rejectWithValue("An unknown error occurred");
+            return rejectWithValue({ code: error?.response?.status as number, message: error?.response?.data.message });
         }
     }
 )
@@ -37,15 +38,19 @@ const PostSlice = createSlice({
     extraReducers: (builder) => {
         builder.
             addCase(fetchPostData.pending, (state) => {
-                state.status = "loading";
+                state.status = true;
+                state.items = [];
+                resetError(state);
             })
             .addCase(fetchPostData.fulfilled, (state, action: PayloadAction<GalleryResponse>) => {
-                state.status = "succeeded";
+                state.status = false;
                 state.items = action.payload;
+                resetError(state);
             })
             .addCase(fetchPostData.rejected, (state, action) => {
-                state.status = "failed";
-                state.error = action.payload as string;
+                state.status = false;
+                state.items = []
+                setErrorFromPayload(state, action.payload);
             })
     }
 
