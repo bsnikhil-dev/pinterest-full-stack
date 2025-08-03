@@ -1,27 +1,45 @@
-import type React from "react";
+import React, { Suspense } from "react";
 import "./comments.css";
-import EmojiPicker from "emoji-picker-react";
-import { useEffect, useState } from "react";
+import { type EmojiClickData } from "emoji-picker-react";
+import { useCallback, useEffect, useState, } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hook";
-import { fetchUserCommentsData } from "../../features/user/useSlice";
+import { fetchUserCommentsData, addComments } from "../../features/user/useSlice";
 import { timeAgo } from "../../utils/commonUtils";
+
+const EmojiPicker = React.lazy(() => import('emoji-picker-react'));
 
 const Comments = ({ userId }: { userId?: string }): React.ReactElement => {
 
     const [emojiPicker, setEmojiPicker] = useState<boolean>(false);
+    const [commentInput, setCommentInput] = useState<string>("");
 
-    const handleEmojiPicker = (): void => {
+    const handleEmojiPicker = useCallback((): void => {
         setEmojiPicker((prev) => !prev);
-    }
+    }, [])
 
     const dispatch = useAppDispatch();
     const comments = useAppSelector((state) => state.user.comments);
+
+    const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setCommentInput(e.target.value);
+    }
+
+    const handleEmojiInput = (emojiData: EmojiClickData) => {
+        setCommentInput((prev) => prev + emojiData.emoji)
+        setEmojiPicker((prev) => !prev);
+    }
+
+    const handleCommentFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        dispatch(addComments({ description: commentInput, pin: userId as string }));
+        
+    }
 
     useEffect(() => {
         dispatch(fetchUserCommentsData(userId as string));
     }, [userId])
 
-    // console.log(comments);
+
     return (
         <div className="comments">
             <div className="commentList">
@@ -43,13 +61,19 @@ const Comments = ({ userId }: { userId?: string }): React.ReactElement => {
                 }
             </div>
 
-            <form className="commentForm">
-                <input type="text" placeholder="Add a comment" />
+            <form className="commentForm" onSubmit={handleCommentFormSubmit}>
+                <input type="text"
+                    placeholder="Add a comment"
+                    value={commentInput}
+                    onChange={handleInput}
+                />
                 <div className="emoji">
                     <div onClick={handleEmojiPicker}>😊</div>
                     {
                         emojiPicker && <div className="emojiPicker">
-                            <EmojiPicker />
+                            <Suspense fallback={<div>Loading…</div>}>
+                                <EmojiPicker onEmojiClick={handleEmojiInput} />
+                            </Suspense>
                         </div>
                     }
 

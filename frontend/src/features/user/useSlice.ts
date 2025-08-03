@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import { fetchUser, fetchUserComments } from "../../api/services/usersService";
+import { addUserComment, fetchUser, fetchUserComments } from "../../api/services/usersService";
 import { AxiosError } from "axios";
 import type { UserComment } from "../../types";
 import { resetError, setErrorFromPayload } from "../../utils/commonUtils";
@@ -56,6 +56,21 @@ export const fetchUserCommentsData = createAsyncThunk<UserComment[], string, { r
                 return rejectWithValue({ code: error?.status as number, message: error?.response?.data.message });
             }
             return rejectWithValue({ code: error?.status as number, message: error?.response?.data.message });
+        }
+    }
+);
+
+export const addComments = createAsyncThunk<string, { description: string, pin: string }, { rejectValue: { message: string } }>(
+    "add/UserComments",
+    async (userComments, { rejectWithValue }) => {
+        try {
+            const response = await addUserComment(userComments.description, userComments.pin);
+            return response;
+        } catch (error: any) {
+            if (error instanceof AxiosError) {
+                return rejectWithValue(error.response?.data);
+            }
+            return rejectWithValue(error.response?.data);
         }
     }
 );

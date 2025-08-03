@@ -7,7 +7,7 @@ export const generateToken = (userId) => {
     return jwt.sign(
         { userId },
         process.env.JWT_SECRET,
-        { expiresIn: "5s" }
+        { expiresIn: "1h" }
     );
 };
 
@@ -77,6 +77,7 @@ export const loginUser = async (req, res) => {
         const { email, password } = req.body;
 
         const user = await User.findOne({ email });
+        console.log(user.img);
         if (!user) {
             return res.status(401).json({ message: "Invalid email or password", code: "INVALID_CREDENTIALS" });
         }
@@ -168,5 +169,62 @@ export const getUser = async (req, res) => {
 };
 
 export const followUser = async (req, res) => {
+
+    // const { username } = req.params;
+    // const currentUserId = req.userId;
+
+    // try {
+
+    //     const user = await User.findOne({ username });
+
+    //     const isFollowing = await Follow.exists({
+    //         follower: req.userId,
+    //         following: user._id,
+    //     });
+
+    //     if (isFollowing) {
+    //         await Follow.deleteOne({ follower: req.userId, following: user._id });
+    //         return res.status(200).json({ message: `Unfollowed ${username}.` });
+    //     } else {
+    //         await Follow.create({ follower: req.userId, following: user._id });
+    //         return res.status(200).json({ message: `Started following ${username}.` });
+    //     }
+
+    // } catch (error) {
+    //     console.error('Follow/unfollow error:', error);
+    //     return res.status(500).json({ message: 'An error occurred.', error: error.message });
+    // }
+    const { username } = req.params;
+    const currentUserId = req.userId;
+
+    try {
+
+        const userToFollow = await User.findOne({ username });
+        if (!userToFollow) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
+        if (userToFollow._id.equals(currentUserId)) {
+            return res.status(400).json({ message: "You can't follow yourself." });
+        }
+
+        // Check if already following
+        const existingFollow = await Follow.findOne({
+            follower: currentUserId,
+            following: userToFollow._id,
+        });
+
+        if (existingFollow) {
+            await existingFollow.deleteOne();
+            return res.status(200).json({ message: `Unfollowed ${username}.` });
+        } else {
+            await Follow.create({ follower: currentUserId, following: userToFollow._id });
+            return res.status(200).json({ message: `Started following ${username}.` });
+        }
+
+    } catch (error) {
+        console.error('Follow/unfollow error:', error);
+        return res.status(500).json({ message: 'An error occurred.', error: error.message });
+    }
 
 };
