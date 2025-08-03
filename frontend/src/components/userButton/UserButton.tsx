@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useAppDispatch } from "../../app/hook";
 import { logout } from "../../features/authentication/authentication";
+import { logOutUser } from "../../api/services/usersService";
 
 const UserButton = (): React.ReactElement => {
 
@@ -15,8 +16,17 @@ const UserButton = (): React.ReactElement => {
         setShowOptions((prev) => !prev);
     }
 
+    const callLogOut = async () => {
+        try {
+            await logOutUser();
+        } catch (err) {
+            console.error("Logout API failed:", err);
+        }
+    }
+
     const handleLogout = (): void => {
         dispatch(logout());
+        callLogOut();
         sessionStorage.removeItem("token");
         navigate("/auth", { replace: true });
     }

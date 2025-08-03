@@ -7,7 +7,15 @@ export const generateToken = (userId) => {
     return jwt.sign(
         { userId },
         process.env.JWT_SECRET,
-        { expiresIn: "10m" }
+        { expiresIn: "5s" }
+    );
+};
+
+export const generateRefreshToken = (userId) => {
+    return jwt.sign(
+        { userId },
+        process.env.JWT_REFRESH_SECRET,
+        { expiresIn: '7d' }
     );
 };
 
@@ -43,6 +51,15 @@ export const registerUser = async (req, res) => {
 
         const { _id, hashedPassword, createdAt, updatedAt, __v, ...rest } = user.toObject();
 
+        const refreshToken = generateRefreshToken(user._id);
+
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'Strict',
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        });
+
         const userDetails = {
             token: `Bearer ${token}`,
             userId: _id.toString(),
@@ -71,8 +88,16 @@ export const loginUser = async (req, res) => {
         }
 
         const token = generateToken(user._id);
+        const refreshToken = generateRefreshToken(user._id);
 
         const { _id, hashedPassword, createdAt, updatedAt, __v, ...rest } = user.toObject();
+
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'Strict',
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        });
 
         const userDetails = {
             token: `Bearer ${token}`,
@@ -81,29 +106,64 @@ export const loginUser = async (req, res) => {
         };
         return res.status(200).json(userDetails);
     } catch (err) {
+        console.log(err);
         return res.status(500).json({ message: "Internal Server Error", code: "INTERNAL_ERROR" });
     }
 };
 
+export const issueRefreshedToken = async (req, res) => {
+
+    const token = req.cookies.refreshToken;
+
+    if (!token) return res.status(401).json({ message: 'No refresh token' });
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
+        const accessToken = generateToken(decoded.userId);
+
+        return res.json({ accessToken });
+    } catch (err) {
+        return res.status(403).json({ message: 'Invalid refresh token' });
+    }
+}
+
 export const logoutUser = async (req, res) => {
+
+    try {
+        res.clearCookie('refreshToken', {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'Strict',
+        });
+        return res.status(200).json({ message: 'Logged out successfully' });
+    } catch (error) {
+        return res.status(500).json({ message: "Internal Server Error", code: "INTERNAL_ERROR" });
+    }
 
 };
 
 export const getUser = async (req, res) => {
-    const { username } = req.params;
-    const user = await User.findOne({ username });
 
-    const { hashedPassword, ...otherDetails } = user.toObject();
+    try {
+        const { username } = req.params;
+        const user = await User.findOne({ username });
 
-    const followerCount = await Follow.countDocuments({ following: user._id });
-    const followingCount = await Follow.countDocuments({ follower: user._id });
+        const { hashedPassword, ...otherDetails } = user.toObject();
 
-    await new Promise((resolve) => setTimeout(resolve, 5000));
-    res.status(200).json({
-        ...otherDetails,
-        followerCount,
-        followingCount,
-    });
+        const followerCount = await Follow.countDocuments({ following: user._id });
+        const followingCount = await Follow.countDocuments({ follower: user._id });
+
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+
+        return res.status(200).json({
+            ...otherDetails,
+            followerCount,
+            followingCount,
+        });
+    } catch (error) {
+        return res.status(500).json({ message: "Internal Server Error", code: "INTERNAL_ERROR" });
+    }
+
 
 };
 

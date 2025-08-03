@@ -45,3 +45,12 @@ export const loginUser = async (userData: { email: string; password: string; }):
         return Promise.reject(error);
     }
 }
+
+export const logOutUser = async () => {
+    try {
+        const response = await apiClient.post(`/users/auth/logout`);
+        return response.data;
+    } catch (error) {
+        console.log(error)
+    }
+}

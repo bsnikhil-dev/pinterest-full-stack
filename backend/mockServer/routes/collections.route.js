@@ -5,7 +5,7 @@ import { validateHeaders } from "../middlewares/validateHeaders.js"
 
 const router = express.Router();
 
-const authPipeline = [validateHeaders()];
+const authPipeline = [validateHeaders(),verifyToken];
 
 router.use(authPipeline);
 
