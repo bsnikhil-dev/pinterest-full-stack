@@ -2,6 +2,7 @@ import { createAsyncThunk, createSlice, type PayloadAction } from "@reduxjs/tool
 import { fetchUser, fetchUserComments } from "../../api/services/usersService";
 import { AxiosError } from "axios";
 import type { UserComment } from "../../types";
+import { resetError, setErrorFromPayload } from "../../utils/commonUtils";
 
 export interface UserData {
     _id: string;
@@ -16,43 +17,45 @@ export interface UserData {
 interface UserState {
     user: UserData | null;
     comments: UserComment[] | null;
-    status: 'idle' | 'loading' | 'succeeded' | 'failed';
-    error: string | null;
+    status: boolean | null;
+    error: {
+        code: number | null; message: string | null
+    };
 };
 
 const UserInitialState: UserState = {
+    status: null,
     user: null,
     comments: null,
-    status: "idle",
-    error: null,
+    error: { code: null, message: null }
 };
 
-export const fetchUserData = createAsyncThunk<UserData, string, { rejectValue: string }>(
+export const fetchUserData = createAsyncThunk<UserData, string, { rejectValue: { code: number; message: string } }>(
     "fetch/userData",
     async (username, { rejectWithValue }) => {
         try {
             const response = await fetchUser(username);
             return response;
-        } catch (error) {
+        } catch (error: any) {
             if (error instanceof AxiosError) {
-                return rejectWithValue(error.response?.data);
+                return rejectWithValue({ code: error?.status as number, message: error?.response?.data.message });
             }
-            return rejectWithValue("An unknown error occurred");
+            return rejectWithValue({ code: error?.response?.status as number, message: error?.response?.data.message });
         }
     }
 )
 
-export const fetchUserCommentsData = createAsyncThunk<UserComment[], string, { rejectValue: string }>(
+export const fetchUserCommentsData = createAsyncThunk<UserComment[], string, { rejectValue: { code: number; message: string } }>(
     "fetch/userComments",
     async (userId, { rejectWithValue }) => {
         try {
             const response = await fetchUserComments(userId);
             return response;
-        } catch (error) {
+        } catch (error: any) {
             if (error instanceof AxiosError) {
-                return rejectWithValue(error.response?.data);
+                return rejectWithValue({ code: error?.status as number, message: error?.response?.data.message });
             }
-            return rejectWithValue("");
+            return rejectWithValue({ code: error?.status as number, message: error?.response?.data.message });
         }
     }
 );
@@ -64,26 +67,37 @@ const UserSlice = createSlice({
     extraReducers: (builder) => {
         builder
             .addCase(fetchUserData.pending, (state) => {
-                state.status = "loading";
+                state.status = true;
+                state.user = null;
+                state.comments = null;
+                resetError(state);
             })
             .addCase(fetchUserData.fulfilled, (state, action: PayloadAction<UserData>) => {
+                state.status = false;
                 state.user = action.payload;
-                state.status = "succeeded";
+                resetError(state);
             })
             .addCase(fetchUserData.rejected, (state, action) => {
-                state.status = "failed";
-                state.error = action.payload as string;
+                state.status = false;
+                state.user = null;
+                setErrorFromPayload(state, action.payload);
             })
             .addCase(fetchUserCommentsData.pending, (state) => {
-                state.status = "loading";
+                state.status = true;
+                state.user = null;
+                state.comments = null;
+                resetError(state);
             })
             .addCase(fetchUserCommentsData.fulfilled, (state, action: PayloadAction<UserComment[]>) => {
+                state.status = false;
                 state.comments = action.payload;
-                state.status = "succeeded";
+                resetError(state);
             })
             .addCase(fetchUserCommentsData.rejected, (state, action) => {
-                state.status = "failed";
-                state.error = action.payload as string;
+                state.status = false;
+                state.user = null;
+                state.comments = null;
+                setErrorFromPayload(state, action.payload);
             })
     }
 });

@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import { fetchCollectionsData } from "../../api/services/collectionsService";
 import { AxiosError } from "axios";
+import { resetError, setErrorFromPayload } from "../../utils/commonUtils";
 
 interface Pin {
     _id: string;
@@ -26,28 +27,28 @@ export interface Collection {
 }
 
 interface CollectionsData {
+    status: boolean | null;
     items: Collection[];
-    status: 'idle' | 'loading' | 'succeeded' | 'failed';
-    error: string | null;
+    error: { code: number | null; message: string | null };
 }
 
 const CollectionsInitialData: CollectionsData = {
+    status: null,
     items: [],
-    status: 'idle',
-    error: null
+    error: { code: null, message: null }
 }
 
-export const fetchCollections = createAsyncThunk<Collection[], string, { rejectValue: string }>(
+export const fetchCollections = createAsyncThunk<Collection[], string, { rejectValue: { code: number; message: string } }>(
     "fetch/collections",
     async (userId, { rejectWithValue }) => {
         try {
             const data = await fetchCollectionsData(userId);
             return data;
-        } catch (error) {
+        } catch (error: any) {
             if (error instanceof AxiosError) {
-                return rejectWithValue(error.response?.data || "An error occurred");
+                return rejectWithValue({ code: error?.status as number, message: error?.response?.data.message });
             }
-            return rejectWithValue("An unknown error occurred");
+            return rejectWithValue({ code: error?.response?.status as number, message: error?.response?.data.message });
         }
     }
 );
@@ -59,15 +60,19 @@ const CollectionsSlice = createSlice({
     extraReducers: (builder) => {
         builder
             .addCase(fetchCollections.pending, (state) => {
-                state.status = "loading"
+                state.status = true;
+                state.items = [];
+                resetError(state);
             })
             .addCase(fetchCollections.fulfilled, (state, action: PayloadAction<Collection[]>) => {
-                state.status = "succeeded";
+                state.status = false;
                 state.items = action.payload;
+                resetError(state);
             })
             .addCase(fetchCollections.rejected, (state, action) => {
-                state.status = "failed";
-                state.error = action.payload || null;
+                state.status = false;
+                state.items = []
+                setErrorFromPayload(state, action.payload);
             })
     }
 });
