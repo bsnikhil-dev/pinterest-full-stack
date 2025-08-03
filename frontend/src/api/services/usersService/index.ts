@@ -12,15 +12,6 @@ export const fetchUser = async (username: string): Promise<UserData> => {
     }
 }
 
-export const fetchUserComments = async (userId: string): Promise<UserComment[]> => {
-    try {
-        const response = await apiClient.get<UserComment[]>(`/comments/${userId}`);
-        return response.data;
-    } catch (error) {
-        throw error;
-    }
-}
-
 export const registerUser = async (userData: {
     username: string;
     displayName: string;
@@ -53,4 +44,35 @@ export const logOutUser = async () => {
     } catch (error) {
         console.log(error)
     }
+}
+
+export const fetchUserComments = async (userId: string): Promise<UserComment[]> => {
+    try {
+        const response = await apiClient.get<UserComment[]>(`/comments/${userId}`);
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+}
+
+export const addUserComment = async (comment: string, pin: string): Promise<string> => {
+    try {
+        const response = await apiClient.post(`/comments/addComment`, { description: comment, pin: pin });
+        return response.data;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+
+
+}
+
+export const followUser = async (userName: string): Promise<string> => {
+    try {
+        const response = await apiClient.post(`/users/follow/${userName}`);
+        return response.data;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+
+
 }

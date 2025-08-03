@@ -20,6 +20,7 @@ export const verifyToken = (req, res, next) => {
                 code: "INVALID_TOKEN"
             });
         }
+        req.userId = payload.userId;
         next();
     });
 };
