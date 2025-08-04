@@ -8,6 +8,7 @@ export const getPostComments = async (req, res) => {
     .populate("user", "username img displayName")
     .sort({ createdAt: -1 });
 
+  await new Promise((resolve) => setTimeout(resolve, 1000));
   res.status(200).json(comments);
 };
 
@@ -33,6 +34,7 @@ export const addComment = async (req, res) => {
       user: userId,
     });
 
+    // await new Promise((resolve) => setTimeout(resolve, 1000));
     return res.status(201).json({
       message: 'Comment created successfully.',
       data: comment,
