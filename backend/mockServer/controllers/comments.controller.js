@@ -13,7 +13,7 @@ export const getPostComments = async (req, res) => {
 };
 
 export const deleteAllComments = async (req, res) => {
-  console.error('Error deleting comments:');
+  // console.error('Error deleting comments:');
   try {
     await Comment.deleteMany({});
     res.status(200).json({ message: 'All comments deleted successfully.' });

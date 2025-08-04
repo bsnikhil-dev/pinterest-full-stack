@@ -1,7 +1,6 @@
 import { createAsyncThunk, createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import { addUserComment, fetchUser, fetchUserComments } from "../../api/services/usersService";
+import { fetchUser, } from "../../api/services/usersService";
 import { AxiosError } from "axios";
-import type { UserComment } from "../../types";
 import { resetError, setErrorFromPayload } from "../../utils/commonUtils";
 
 export interface UserData {
@@ -16,7 +15,6 @@ export interface UserData {
 
 interface UserState {
     user: UserData | null;
-    comments: UserComment[] | null;
     status: boolean | null;
     error: {
         code: number | null; message: string | null
@@ -26,7 +24,6 @@ interface UserState {
 const UserInitialState: UserState = {
     status: null,
     user: null,
-    comments: null,
     error: { code: null, message: null }
 };
 
@@ -45,36 +42,6 @@ export const fetchUserData = createAsyncThunk<UserData, string, { rejectValue: {
     }
 )
 
-export const fetchUserCommentsData = createAsyncThunk<UserComment[], string, { rejectValue: { code: number; message: string } }>(
-    "fetch/userComments",
-    async (userId, { rejectWithValue }) => {
-        try {
-            const response = await fetchUserComments(userId);
-            return response;
-        } catch (error: any) {
-            if (error instanceof AxiosError) {
-                return rejectWithValue({ code: error?.status as number, message: error?.response?.data.message });
-            }
-            return rejectWithValue({ code: error?.status as number, message: error?.response?.data.message });
-        }
-    }
-);
-
-export const addComments = createAsyncThunk<string, { description: string, pin: string }, { rejectValue: { message: string } }>(
-    "add/UserComments",
-    async (userComments, { rejectWithValue }) => {
-        try {
-            const response = await addUserComment(userComments.description, userComments.pin);
-            return response;
-        } catch (error: any) {
-            if (error instanceof AxiosError) {
-                return rejectWithValue(error.response?.data);
-            }
-            return rejectWithValue(error.response?.data);
-        }
-    }
-);
-
 const UserSlice = createSlice({
     name: "user",
     initialState: UserInitialState,
@@ -84,7 +51,6 @@ const UserSlice = createSlice({
             .addCase(fetchUserData.pending, (state) => {
                 state.status = true;
                 state.user = null;
-                state.comments = null;
                 resetError(state);
             })
             .addCase(fetchUserData.fulfilled, (state, action: PayloadAction<UserData>) => {
@@ -95,23 +61,6 @@ const UserSlice = createSlice({
             .addCase(fetchUserData.rejected, (state, action) => {
                 state.status = false;
                 state.user = null;
-                setErrorFromPayload(state, action.payload);
-            })
-            .addCase(fetchUserCommentsData.pending, (state) => {
-                state.status = true;
-                state.user = null;
-                state.comments = null;
-                resetError(state);
-            })
-            .addCase(fetchUserCommentsData.fulfilled, (state, action: PayloadAction<UserComment[]>) => {
-                state.status = false;
-                state.comments = action.payload;
-                resetError(state);
-            })
-            .addCase(fetchUserCommentsData.rejected, (state, action) => {
-                state.status = false;
-                state.user = null;
-                state.comments = null;
                 setErrorFromPayload(state, action.payload);
             })
     }

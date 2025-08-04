@@ -38,9 +38,7 @@ const Comments = ({ userId }: { userId?: string }): React.ReactElement => {
 
     const {
         data: comments,
-        isFetching: getCommentLoading,
-        isError: getCommentError,
-        error: getCommentErrorDetails } = useQuery({
+        isFetching: getCommentLoading } = useQuery({
             queryKey: ['comments'],
             queryFn: () => fetchUserComments(userId as string),
             refetchOnWindowFocus: false,
@@ -48,11 +46,9 @@ const Comments = ({ userId }: { userId?: string }): React.ReactElement => {
 
     const {
         mutate: addComment,
-        isPending: addCommentLoading,
-        isError: addCommentError,
-        error: addCommentErrorDetails } = useMutation<string, Error, { comment: string; pin: string }>({
+        isPending: addCommentLoading } = useMutation<string, Error, { comment: string; pin: string }>({
             mutationFn: ({ comment, pin }: { comment: string; pin: string }) => addUserComment(comment, pin),
-            onSuccess(data) {
+            onSuccess() {
                 queryClient.invalidateQueries({ queryKey: ['comments'] })
             },
             onError(error) {
@@ -63,8 +59,6 @@ const Comments = ({ userId }: { userId?: string }): React.ReactElement => {
             },
         });
 
-    console.log(getCommentError, getCommentErrorDetails)
-    console.log(addCommentError, addCommentErrorDetails)
     if (getCommentLoading || addCommentLoading) {
         return <div><SmallSpinner message="Loading Comments" /></div>
     }
