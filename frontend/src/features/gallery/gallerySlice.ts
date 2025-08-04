@@ -35,7 +35,7 @@ export const fetchGallery = createAsyncThunk<GalleryResponse, FetchGalleryPayloa
             if (error instanceof AxiosError) {
                 return rejectWithValue({ code: error?.status as number, message: error?.response?.data.message });
             }
-            console.log(error)
+            // console.log(error)
             return rejectWithValue({ code: error?.response?.status as number, message: error?.response?.data.message });
         }
     }

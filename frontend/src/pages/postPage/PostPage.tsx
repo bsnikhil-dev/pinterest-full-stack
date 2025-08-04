@@ -3,55 +3,55 @@ import "./postPage.css";
 import PostInteractions from "../../components/postInteractions/PostInteractions";
 import { Link, useParams } from "react-router";
 import Comments from "../../components/comments/Comments";
-import { useAppDispatch, useAppSelector } from "../../app/hook";
-import { useEffect } from "react";
-import { fetchPostData } from "../../features/post/postSlice";
+import { useEffect, useState } from "react";
 import Spinner from "../../components/spinner/Spinner";
 import AsyncLoaderComponent from "../../components/customAsyncComponent/AsyncLoader";
 import ErrorComponent from "../../components/error/Error";
-import { checkErrorStatus } from "../../utils/commonUtils";
+import { useQuery } from "@tanstack/react-query";
+// import type { GalleryResponse } from "../../api/services/galleryService/galleryService.types";
+import { fetchPost } from "../../api/services/galleryService";
+import axios from "axios";
 
 const PostPage = (): React.ReactElement => {
 
-    const dispatch = useAppDispatch();
     const { id } = useParams();
-    const { items: postData, status: loadingStatus, error } = useAppSelector((state) => state.post);
 
-    let postImage: string | null = null;
-    let userName: string | null = null;
-    let userImage: string | null = null;
-    let displayName: string | null = null;
+    const [errorState, setErrorState] = useState<{ code: number | null; message: string | null }>({ code: null, message: null });
 
-    const isError = checkErrorStatus(error);
+    const { isFetching: postloadingStatus,
+        data: postData,
+        error: postError, isError: postErrorFlag, refetch } = useQuery<any, any>({
 
-    if (postData[0]) {
-        const { media, user } = postData[0];
+            queryKey: ["post"],
+            queryFn: () => fetchPost(id as string),
+            refetchOnWindowFocus: false,
+            retry: false,
+        });
 
-        postImage = media as string;
+    const { media, user } = postData;
 
-        if (user) {
-            userName = user.username as string;
-            userImage = user.img as string;
-            displayName = user.displayName as string;
-        }
-    }
-
-    const handleRetry = () => {
-        dispatch(fetchPostData(id as string));
-    };
+    let postImage = media as string;
+    let userName = user.username as string;
+    let userImage = user.img as string;
+    let displayName = user.displayName as string;
 
     useEffect(() => {
-        if (id) {
-            dispatch(fetchPostData(id));
+        if (postError) {
+            if (axios.isAxiosError(postError)) {
+                setErrorState({ code: postError?.status as number, message: postError?.response?.data.message })
+                return;
+            }
+            setErrorState({ code: postError?.response?.status as number, message: postError?.response?.data.message });
+            return;
         }
-    }, [id]);
+    }, [postErrorFlag, postError])
 
     return (
         <AsyncLoaderComponent
-            isLoading={loadingStatus}
+            isLoading={postloadingStatus}
             loaderComponent={<Spinner centered message="Loading Your Post!" />}
-            isError={isError ? true : false}
-            errorComponent={<ErrorComponent errorMessage={error.message as string} errorCode={error.code as number} onRetry={handleRetry} />}
+            isError={postErrorFlag ? true : false}
+            errorComponent={<ErrorComponent errorMessage={errorState.message as string} errorCode={errorState.code as number} onRetry={refetch} />}
             contentComponent={<div className="postpage">
                 <Link to={`/`}>
                     <svg
@@ -78,6 +78,7 @@ const PostPage = (): React.ReactElement => {
                 </div>
             </div>}
         />
+
 
     )
 }
