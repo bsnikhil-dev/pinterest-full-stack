@@ -1,10 +1,12 @@
 import React, { Suspense } from "react";
 import "./comments.css";
 import { type EmojiClickData } from "emoji-picker-react";
-import { useCallback, useEffect, useState, } from "react";
-import { useAppDispatch, useAppSelector } from "../../app/hook";
-import { fetchUserCommentsData, addComments } from "../../features/user/useSlice";
+import { useCallback, useState, } from "react";
 import { timeAgo } from "../../utils/commonUtils";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { addUserComment, fetchUserComments } from "../../api/services/usersService";
+import { AxiosError } from "axios";
+import SmallSpinner from "../smallSpinner/SmallSpinner";
 
 const EmojiPicker = React.lazy(() => import('emoji-picker-react'));
 
@@ -17,9 +19,6 @@ const Comments = ({ userId }: { userId?: string }): React.ReactElement => {
         setEmojiPicker((prev) => !prev);
     }, [])
 
-    const dispatch = useAppDispatch();
-    const comments = useAppSelector((state) => state.user.comments);
-
     const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
         setCommentInput(e.target.value);
     }
@@ -31,14 +30,44 @@ const Comments = ({ userId }: { userId?: string }): React.ReactElement => {
 
     const handleCommentFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        dispatch(addComments({ description: commentInput, pin: userId as string }));
-        
+        addComment({ comment: commentInput, pin: userId as string });
+        setCommentInput("");
     }
 
-    useEffect(() => {
-        dispatch(fetchUserCommentsData(userId as string));
-    }, [userId])
+    const queryClient = useQueryClient();
 
+    const {
+        data: comments,
+        isFetching: getCommentLoading,
+        isError: getCommentError,
+        error: getCommentErrorDetails } = useQuery({
+            queryKey: ['comments'],
+            queryFn: () => fetchUserComments(userId as string),
+            refetchOnWindowFocus: false,
+        })
+
+    const {
+        mutate: addComment,
+        isPending: addCommentLoading,
+        isError: addCommentError,
+        error: addCommentErrorDetails } = useMutation<string, Error, { comment: string; pin: string }>({
+            mutationFn: ({ comment, pin }: { comment: string; pin: string }) => addUserComment(comment, pin),
+            onSuccess(data) {
+                queryClient.invalidateQueries({ queryKey: ['comments'] })
+            },
+            onError(error) {
+                if (error instanceof AxiosError) {
+                    console.error("Axios error :", error);
+                }
+                console.error("Other error:", error);
+            },
+        });
+
+    console.log(getCommentError, getCommentErrorDetails)
+    console.log(addCommentError, addCommentErrorDetails)
+    if (getCommentLoading || addCommentLoading) {
+        return <div><SmallSpinner message="Loading Comments" /></div>
+    }
 
     return (
         <div className="comments">

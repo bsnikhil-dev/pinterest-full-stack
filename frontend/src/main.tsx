@@ -12,28 +12,32 @@ import MainLayout from './layouts/mainLayout/MainLayout.tsx'
 import { Provider } from 'react-redux'
 import { store } from './app/store.ts'
 import ProtectedRoute from './components/protectedRoute/ProtectedRoute.tsx'
+import queryClient from './queryClient.ts'
+import { QueryClientProvider } from '@tanstack/react-query'
 
 const baseurl = import.meta.env.VITE_BASE_PATH;
 
 createRoot(document.getElementById('root')!).render(
 
   <StrictMode>
-    <Provider store={store}>
-      <BrowserRouter basename={baseurl}>
-        <Routes>
-          <Route element={<ProtectedRoute />}>
-            <Route element={<MainLayout />}>
-              <Route path='/' element={<HomePage />} />
-              <Route path='/create' element={<CreatePage />} />
-              <Route path='/pin/:id' element={<PostPage />} />
-              <Route path='/user/:username' element={<ProfilePage />} />
-              <Route path="/search" element={<SearchPage />} />
+    <QueryClientProvider client={queryClient}>
+      <Provider store={store}>
+        <BrowserRouter basename={baseurl}>
+          <Routes>
+            <Route element={<ProtectedRoute />}>
+              <Route element={<MainLayout />}>
+                <Route path='/' element={<HomePage />} />
+                <Route path='/create' element={<CreatePage />} />
+                <Route path='/pin/:id' element={<PostPage />} />
+                <Route path='/user/:username' element={<ProfilePage />} />
+                <Route path="/search" element={<SearchPage />} />
+              </Route>
             </Route>
-          </Route>
-          <Route path='/auth' element={<AuthPage />} />
-          <Route path='*' element={<h1>Not found</h1>} />
-        </Routes>
-      </BrowserRouter>
-    </Provider>
+            <Route path='/auth' element={<AuthPage />} />
+            <Route path='*' element={<h1>Not found</h1>} />
+          </Routes>
+        </BrowserRouter>
+      </Provider>
+    </QueryClientProvider>
   </StrictMode>,
 )
